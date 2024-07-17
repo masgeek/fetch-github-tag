@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "py-github"
+version = "1.0.0"
+description = ""
+authors = ["Munywele S <barsamms@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
+pygithub = "^2.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
