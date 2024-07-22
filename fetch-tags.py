@@ -83,9 +83,9 @@ def write_tag_to_file(release_tag):
 if __name__ == "__main__":
 
     prs = get_pull_request()
+
     for pr in prs:
         logger.info(pr.get('title'))
-    exit(6000)
     # Fetch tag from pull request or latest release
     tag = get_tag_from_pull_request()
 
