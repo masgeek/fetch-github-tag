@@ -15,7 +15,7 @@ def get_headers(token: str):
 
 @app.command()
 def fetch(
-        repo: str = typer.Option(getenv("REPO_NAME", ""), help="GitHub repo in 'owner/repo' format"),
+        repo: str = typer.Option(getenv("GITHUB_REPOSITORY", ""), help="GitHub repo in 'owner/repo' format"),
         token: str = typer.Option(getenv("GITHUB_TOKEN", ""), help="GitHub token (env: GITHUB_TOKEN)"),
         disallow: str = typer.Option(getenv("DISALLOWED_ASSET_EXTS", ""),
                                      help="Comma-separated disallowed extensions"),
@@ -45,12 +45,12 @@ def fetch(
         if disallowed_exts:
             for name in assets:
                 if any(name.endswith(ext) for ext in disallowed_exts):
-                    logger.warning(f"Disallowed asset found in release {tag}: {name}")
+                    logger.error(f"Disallowed asset found in release {tag}: {name}")
                     raise typer.Exit(code=2)
 
-        with open(output, "w") as f:
-            f.write(tag)
-        logger.success(f"Release tag '{tag}' saved to {output}")
+        # Output the tag to stdout for GitHub Actions to capture
+        print(tag)
+        logger.success(f"Release tag '{tag}' fetched successfully")
 
     except requests.RequestException as e:
         logger.error(f"Error fetching release: {e}")

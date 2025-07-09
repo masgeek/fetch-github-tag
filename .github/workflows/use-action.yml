@@ -1,0 +1,29 @@
+name: Use Secure Tag Fetcher
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.fetch_tag.outputs.tag }}  # <-- Expose output to other jobs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch Latest GitHub Tag
+        id: fetch_tag
+        uses: masgeek/fetch-github-tag@develop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #          GITHUB_REPOSITORY: IITA-AKILIMO/akilimo-mobile
+  #          DISALLOWED_ASSET_EXTS: ".apk,.aab"
+  #          LATEST_TAG_FILE: "latest_tag.txt"
+
+  build:
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building tag ${{ needs.fetch.outputs.tag }}"

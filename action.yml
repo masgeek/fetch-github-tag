@@ -1,10 +1,11 @@
 name: "Fetch GitHub Release Tag"
 description: "Fetch the latest GitHub release tag unless disallowed assets are attached (e.g. .apk, .aab)."
 author: "Munywele Sammy Barasa"
-inputs: {}
+inputs: { }
 outputs:
   tag:
     description: "The fetched release tag"
+    value: ${{ steps.fetch_tag.outputs.tag }}
 
 runs:
   using: "composite"
@@ -28,10 +29,8 @@ runs:
       shell: bash
 
     - name: 🚀 Run fetch-tag
+      id: fetch_tag
       run: |
-        poetry run fetch-tag fetch
+        TAG=$(poetry run fetch-tag)
+        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       shell: bash
-
-    - name: 📤 Set output
-      id: set_tag
-      run: echo "tag=$(cat ${{ inputs.output }})" >> "$GITHUB_OUTPUT"
