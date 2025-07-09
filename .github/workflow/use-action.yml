@@ -1,6 +1,7 @@
 name: Use Secure Tag Fetcher
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
