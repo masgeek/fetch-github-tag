@@ -20,7 +20,7 @@ runs:
 
     - name: 📦 Install CLI from wheel
       run: |
-        pip install ./dist/latest_tag-*.whl
+        pip install latest_tag
       shell: bash
 
     - name: 🚀 Run fetch-tag
