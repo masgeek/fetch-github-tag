@@ -1,71 +1,55 @@
-# latest_tag/cli.py
-import argparse
+import typer
 import requests
 from os import getenv
 from dotenv import load_dotenv
 from loguru import logger
+from typing import Optional
 
-# Load .env
 load_dotenv()
+app = typer.Typer()
 
 
-class Config:
-    GITHUB_TOKEN = getenv('GITHUB_TOKEN')
-    REPO = getenv('REPO_NAME', 'IITA-AKILIMO/akilimo-mobile')
-    TAG_FILE = getenv('LATEST_TAG_FILE', 'latest_tag.txt')
-    API_ROOT = "https://api.github.com"
-    HEADERS = {'Authorization': f'token {GITHUB_TOKEN}'}
-    RAW_DISALLOWED = getenv('DISALLOWED_ASSET_EXTS', '').strip()
-    DISALLOWED_ASSET_EXTS = (
-        tuple(ext.strip() for ext in RAW_DISALLOWED.split(',') if ext.strip())
-        if RAW_DISALLOWED else None
-    )
+def get_headers(token: str):
+    return {"Authorization": f"token {token}"}
 
 
-def fetch_latest_release_tag_if_no_assets() -> str | None:
-    url = f"{Config.API_ROOT}/repos/{Config.REPO}/releases/latest"
+@app.command()
+def fetch(
+    repo: str = typer.Option(getenv("REPO_NAME", "IITA-AKILIMO/akilimo-mobile"), help="GitHub repo (org/repo)"),
+    token: str = typer.Option(getenv("GITHUB_TOKEN"), help="GitHub token"),
+    output: str = typer.Option(getenv("LATEST_TAG_FILE", "latest_tag.txt"), help="File to write tag"),
+    disallow: Optional[str] = typer.Option(getenv("DISALLOWED_ASSET_EXTS", ""), help="Comma-separated disallowed extensions"),
+):
+    """
+    Fetch the latest GitHub release tag, skipping if disallowed asset types (.apk, .aab, etc.) are present.
+    """
+    if not token:
+        logger.error("GITHUB_TOKEN is missing.")
+        raise typer.Exit(code=1)
+
+    disallowed_exts = tuple(ext.strip() for ext in disallow.split(",") if ext.strip()) if disallow else None
+    logger.info(f"Fetching latest release for {repo}")
+    logger.info(f"Disallowed extensions: {disallowed_exts or 'None'}")
+
     try:
-        response = requests.get(url, headers=Config.HEADERS)
-        response.raise_for_status()
-        release = response.json()
+        url = f"https://api.github.com/repos/{repo}/releases/latest"
+        resp = requests.get(url, headers=get_headers(token))
+        resp.raise_for_status()
+        release = resp.json()
 
-        tag_name = release.get('tag_name')
-        assets = release.get('assets', [])
-        asset_names = [asset.get('name', '') for asset in assets]
+        tag = release.get("tag_name")
+        assets = [a.get("name", "") for a in release.get("assets", [])]
 
-        if Config.DISALLOWED_ASSET_EXTS:
-            disallowed = [
-                name for name in asset_names
-                if any(name.endswith(ext) for ext in Config.DISALLOWED_ASSET_EXTS)
-            ]
-            if disallowed:
-                logger.warning(f"Release '{tag_name}' contains disallowed assets: {disallowed}")
-                return None
-            logger.info(f"Release '{tag_name}' passed asset check.")
-        else:
-            logger.info("No disallowed extensions configured. Skipping asset check.")
+        if disallowed_exts:
+            for name in assets:
+                if any(name.endswith(ext) for ext in disallowed_exts):
+                    logger.warning(f"Disallowed asset found in release {tag}: {name}")
+                    raise typer.Exit(code=2)
 
-        return tag_name
-
-    except requests.exceptions.RequestException as err:
-        logger.error(f"Failed to fetch latest release: {err}")
-        return None
-
-
-def write_tag_to_file(tag: str) -> None:
-    try:
-        with open(Config.TAG_FILE, 'w') as f:
+        with open(output, "w") as f:
             f.write(tag)
-        logger.info(f"Tag '{tag}' written to file: {Config.TAG_FILE}")
-    except Exception as err:
-        logger.error(f"Failed to write tag to file: {err}")
+        logger.success(f"Release tag '{tag}' saved to {output}")
 
-
-def cli():
-    parser = argparse.ArgumentParser(description="Fetch latest GitHub release tag.")
-    parser.parse_args()  # No args yet, placeholder
-
-    logger.info(f"Repository: {Config.REPO}")
-    logger.info(f"Disallowed extensions: {Config.DISALLOWED_ASSET_EXTS or 'None'}")
-
-    tag = fetch_latest_release_tag_if_no_assets()
+    except requests.RequestException as e:
+        logger.error(f"Error fetching release: {e}")
+        raise typer.Exit(code=3)
