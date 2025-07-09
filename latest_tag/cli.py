@@ -45,7 +45,7 @@ def fetch(
         if disallowed_exts:
             for name in assets:
                 if any(name.endswith(ext) for ext in disallowed_exts):
-                    logger.warning(f"Disallowed asset found in release {tag}: {name}")
+                    logger.error(f"Disallowed asset found in release {tag}: {name}")
                     raise typer.Exit(code=2)
 
         with open(output, "w") as f:
