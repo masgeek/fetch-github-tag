@@ -20,5 +20,10 @@ jobs:
 #          DISALLOWED_ASSET_EXTS: ".apk,.aab"
 #          LATEST_TAG_FILE: "latest_tag.txt"
 
-      - name: Show fetched tag
-        run: echo "Fetched tag is ${{ steps.fetch.outputs.tag }}"
+
+
+  build:
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building tag ${{ needs.fetch.outputs.tag }}"
