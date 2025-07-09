@@ -1,7 +1,7 @@
 name: "Fetch GitHub Release Tag"
 description: "Fetch the latest GitHub release tag unless disallowed assets are attached (e.g. .apk, .aab)."
 author: "Munywele Sammy Barasa"
-inputs: {}
+inputs: { }
 outputs:
   tag:
     description: "The fetched release tag"
@@ -35,3 +35,4 @@ runs:
     - name: 📤 Set output
       id: set_tag
       run: echo "tag=$(cat ${{ inputs.output }})" >> "$GITHUB_OUTPUT"
+      shell: bash
