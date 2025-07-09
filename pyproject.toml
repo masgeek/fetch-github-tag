@@ -1,6 +1,6 @@
 [project]
 name = "latest_tag"
-version = "1.0.3"
+version = "1.0.4"
 description = "Tag fetcher for GitHub releases with optional asset filtering"
 authors = [
     { name = "Munywele Sammy Barasa", email = "sammy@munywele.co.ke" }

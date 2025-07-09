@@ -26,6 +26,6 @@ runs:
     - name: 🚀 Run fetch-tag
       id: fetch_tag
       run: |
-        TAG=$(poetry run fetch-tag)
+        TAG=$(fetch-tag)
         echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       shell: bash
