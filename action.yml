@@ -35,7 +35,7 @@ runs:
         key: poetry-${{ hashFiles('**/poetry.lock') }}
 
     - name: 🧱 Install dependencies
-      run: poetry install
+      run: poetry install --no-interaction --no-root
       shell: bash
 
     - name: 🚀 Run fetch-tag
