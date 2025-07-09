@@ -24,4 +24,4 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Building tag ${{ needs.fetch_tag.outputs.tag }}"
+      - run: echo "Building tag ${{ needs.fetch.outputs.tag }}"
