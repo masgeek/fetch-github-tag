@@ -1,0 +1,23 @@
+name: Use Secure Tag Fetcher
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch Latest GitHub Tag
+        uses: munywele/fetch-github-tag@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: IITA-AKILIMO/akilimo-mobile
+          DISALLOWED_ASSET_EXTS: ".apk,.aab"
+          LATEST_TAG_FILE: "latest_tag.txt"
+
+      - name: Show fetched tag
+        run: echo "Fetched tag is ${{ steps.fetch.outputs.tag }}"
