@@ -1,100 +1,86 @@
 from os import getenv
-
 import requests
 from dotenv import load_dotenv
 from loguru import logger
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
-# Retrieve necessary environment variables
-gitToken = getenv('GITHUB_TOKEN')
-repo = getenv('REPO_NAME', 'IITA-AKILIMO/akilimo-mobile')
-tagFile = getenv('LATEST_TAG_FILE', 'latest_tag.txt')
-baseBranch = getenv('BASE_BRANCH', 'main')
 
-# Define the GitHub API root URL
-rootUrl = "https://api.github.com"
+class Config:
+    GITHUB_TOKEN = getenv('GITHUB_TOKEN')
+    REPO = getenv('REPO_NAME', 'IITA-AKILIMO/akilimo-mobile')
+    TAG_FILE = getenv('LATEST_TAG_FILE', 'latest_tag.txt')
+    BASE_BRANCH = getenv('BASE_BRANCH', 'main')
+    API_ROOT = "https://api.github.com"
+    HEADERS = {'Authorization': f'token {GITHUB_TOKEN}'}
 
-# Construct the URL for pull requests
-pulls_url = f"{rootUrl}/repos/{repo}/pulls?base={baseBranch}&state=open"
-headers = {'Authorization': f'token {gitToken}'}
-
-logger.info(f"Fetching latest tags from {repo}")
+    # Parse disallowed extensions only if provided
+    RAW_DISALLOWED = getenv('DISALLOWED_ASSET_EXTS', '').strip()
+    DISALLOWED_ASSET_EXTS = (
+        tuple(ext.strip() for ext in RAW_DISALLOWED.split(',') if ext.strip())
+        if RAW_DISALLOWED else None
+    )
 
 
 @logger.catch
-def get_pull_request():
-    """Fetch open pull requests for the repository."""
+def fetch_latest_release_tag_if_no_assets() -> str | None:
+    """
+    Fetch the latest release tag. Optionally skip if disallowed assets are present.
+    """
+    url = f"{Config.API_ROOT}/repos/{Config.REPO}/releases/latest"
     try:
-        response = requests.get(pulls_url, headers=headers)
+        response = requests.get(url, headers=Config.HEADERS)
         response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as err:
-        logger.error(f'Error occurred while fetching pull requests: {err}')
-        return None
+        release = response.json()
 
+        tag_name = release.get('tag_name')
+        assets = release.get('assets', [])
+        asset_names = [asset.get('name', '') for asset in assets]
 
-@logger.catch
-def latest_tag():
-    """Fetch the latest release tag for the repository."""
-    try:
-        releases_url = f"{rootUrl}/repos/{repo}/releases/latest"
-        response = requests.get(releases_url, headers=headers)
-        response.raise_for_status()
-        tag_resp = response.json()
-        return tag_resp['tag_name']
+        if Config.DISALLOWED_ASSET_EXTS:
+            disallowed = [
+                name for name in asset_names
+                if any(name.endswith(ext) for ext in Config.DISALLOWED_ASSET_EXTS)
+            ]
 
-    except requests.exceptions.RequestException as err:
-        logger.error(f'Error occurred while fetching the latest tag: {err}')
-        return None
-
-
-@logger.catch
-def get_tag_from_pull_request():
-    """Attempt to get the tag from the latest pull request title."""
-    try:
-        pull_requests = get_pull_request()
-        if pull_requests:
-            logger.info(f'Pull request title: {pull_requests[0]["title"]}')
-
-            tag_arr = pull_requests[0]['title'].split()
-            return tag_arr[len(tag_arr) - 1]
+            if disallowed:
+                logger.warning(f"Release '{tag_name}' contains disallowed assets: {disallowed}")
+                return None
+            else:
+                logger.info(f"Release '{tag_name}' passed asset check.")
         else:
-            logger.warning('No pull requests fetched, fetching from tags')
-            return None
-    except (IndexError, KeyError, TypeError) as err:
-        logger.error(f'Error occurred while getting tag from pull requests: {err}')
+            logger.info("No disallowed extensions configured. Skipping asset check.")
+
+        return tag_name
+
+    except requests.exceptions.RequestException as err:
+        logger.error(f"Failed to fetch latest release: {err}")
         return None
 
 
 @logger.catch
-def write_tag_to_file(release_tag):
-    """Write the tag to the specified file."""
+def write_tag_to_file(tag: str) -> None:
+    """
+    Write the tag to the specified file.
+    """
     try:
-        with open(tagFile, "w") as file:
-            file.write(release_tag)
-        logger.info(f'Tag created: {release_tag}')
+        with open(Config.TAG_FILE, 'w') as file:
+            file.write(tag)
+        logger.info(f"Tag '{tag}' written to file: {Config.TAG_FILE}")
     except Exception as err:
-        logger.error(f'An error occurred while writing the tag to the file: {err}')
+        logger.error(f"Failed to write tag to file: {err}")
 
 
-# Main execution block
+# Main execution
 if __name__ == "__main__":
+    logger.info(f"Checking latest release tag for repository: {Config.REPO}")
+    logger.info(f"Disallowed extensions: {Config.DISALLOWED_ASSET_EXTS or 'None'}")
 
-    prs = get_pull_request()
-
-    for pr in prs:
-        logger.info(pr.get('title'))
-    # Fetch tag from pull request or latest release
-    tag = get_tag_from_pull_request()
-
-    if tag is None:
-        tag = latest_tag()
-
-    logger.info(f'Tag: {tag}')
+    tag = fetch_latest_release_tag_if_no_assets()
 
     if tag:
+        logger.success(f"Valid release tag found: {tag}")
         write_tag_to_file(tag)
     else:
-        logger.error('Failed to fetch tag. Exiting.')
+        logger.warning("No valid release tag found.")
