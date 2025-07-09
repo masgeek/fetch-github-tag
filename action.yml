@@ -18,24 +18,9 @@ runs:
     - name: 📦 Install Poetry
       uses: abatilo/actions-poetry@v4
 
-    - name: Download pyproject.toml
-      run: curl -L https://raw.githubusercontent.com/masgeek/fetch-github-tag/develop/pyproject.toml -o pyproject.toml
-      shell: bash
-
-    - name: 📁 Show current directory contents
+    - name: 📦 Install CLI from wheel
       run: |
-        echo "Listing files in $(pwd):"
-        ls -la
-      shell: bash
-
-    - name: 💾 Cache dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pypoetry
-        key: poetry-${{ hashFiles('**/poetry.lock') }}
-
-    - name: 🧱 Install dependencies
-      run: poetry install --no-interaction --no-root
+        pip install ./dist/latest_tag-*.whl
       shell: bash
 
     - name: 🚀 Run fetch-tag
