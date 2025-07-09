@@ -15,7 +15,7 @@ def get_headers(token: str):
 
 @app.command()
 def fetch(
-        repo: str = typer.Option(getenv("REPO_NAME", ""), help="GitHub repo in 'owner/repo' format"),
+        repo: str = typer.Option(getenv("GITHUB_REPOSITORY", ""), help="GitHub repo in 'owner/repo' format"),
         token: str = typer.Option(getenv("GITHUB_TOKEN", ""), help="GitHub token (env: GITHUB_TOKEN)"),
         disallow: str = typer.Option(getenv("DISALLOWED_ASSET_EXTS", ""),
                                      help="Comma-separated disallowed extensions"),
