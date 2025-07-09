@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch Latest GitHub Tag
-        uses: munywele/fetch-github-tag@v1
+        uses: masgeek/fetch-github-tag@develop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_NAME: IITA-AKILIMO/akilimo-mobile
