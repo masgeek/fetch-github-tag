@@ -15,9 +15,6 @@ runs:
       with:
         python-version: '3.13'
 
-    - name: 📦 Install Poetry
-      uses: abatilo/actions-poetry@v4
-
     - name: 📦 Install CLI from wheel
       run: |
         pip install latest_tag
