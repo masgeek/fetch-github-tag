@@ -18,6 +18,7 @@ dependencies = [
     "typer (>=0.16.0,<0.17.0)"
 ]
 
+include = ["pyproject.toml", "README.md", "latest_tag/**/*.py"]
 # Only needed if you're using packages (a src layout or submodule)
 # If not using __init__.py, this can be omitted or changed
 packages = [
