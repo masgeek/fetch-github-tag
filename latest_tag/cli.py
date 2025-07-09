@@ -48,8 +48,12 @@ def fetch(
                     logger.error(f"Disallowed asset found in release {tag}: {name}")
                     raise typer.Exit(code=2)
 
-        with open(output, "w") as f:
-            f.write(tag)
+        if output:
+            with open(output, "a") as f:
+                f.write(f"tag={tag}\n")
+        else:
+            logger.info(f"TAG: {tag}")
+
         logger.success(f"Release tag '{tag}' saved to {output}")
 
     except requests.RequestException as e:
