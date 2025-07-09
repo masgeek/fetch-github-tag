@@ -37,3 +37,9 @@ Ideal for deployment pipelines or automation scripts where only clean releases a
   poetry install
 ```
 
+
+### 4. Run
+```bash
+  poetry run fetch-tag
+```
+
