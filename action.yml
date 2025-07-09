@@ -1,0 +1,51 @@
+name: "Fetch GitHub Release Tag"
+description: "Fetch the latest GitHub release tag unless disallowed assets are attached (e.g. .apk, .aab)."
+author: "Munywele Sammy Barasa"
+inputs:
+  token:
+    description: "GitHub token with repo access"
+    required: true
+  repo:
+    description: "Repository name in 'owner/repo' format"
+    required: true
+  disallow:
+    description: "Comma-separated list of disallowed asset extensions"
+    required: false
+    default: ""
+  output:
+    description: "File path to write the tag"
+    required: false
+    default: "latest_tag.txt"
+outputs:
+  tag:
+    description: "The fetched release tag"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: 📦 Install Poetry
+      uses: abatilo/actions-poetry@v4
+
+    - name: 💾 Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: poetry-${{ hashFiles('**/poetry.lock') }}
+
+    - name: 🧱 Install dependencies
+      run: poetry install
+      shell: bash
+
+    - name: 🚀 Run fetch-tag
+      run: |
+        poetry run fetch-tag fetch
+      shell: bash
+
+    - name: 📤 Set output
+      id: set_tag
+      run: echo "tag=$(cat ${{ inputs.output }})" >> "$GITHUB_OUTPUT"
