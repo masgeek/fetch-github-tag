@@ -7,9 +7,6 @@ on:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.fetch_tag.outputs.tag }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,4 +24,4 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Building tag ${{ needs.fetch.outputs.tag }}"
+      - run: echo "Building tag ${{ needs.fetch_tag.outputs.tag }}"
