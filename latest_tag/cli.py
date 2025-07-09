@@ -26,7 +26,7 @@ def fetch(
     Fetch the latest GitHub release tag, skipping if disallowed asset types (.apk, .aab, etc.) are present.
     """
     if not repo or not token:
-        logger.error("Environment variables REPO_NAME and GITHUB_TOKEN are required.")
+        logger.error("Missing required environment variables: REPO_NAME and GITHUB_TOKEN.")
         raise typer.Exit(code=1)
 
     disallowed_exts = tuple(ext.strip() for ext in disallow.split(",") if ext.strip()) if disallow else None
