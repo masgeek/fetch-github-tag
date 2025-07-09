@@ -14,7 +14,8 @@ dependencies = [
     "python-dotenv>=1.1.1,<2.0.0",
     "loguru>=0.7.2,<1.0.0",
     "requests>=2.32.4,<3.0.0",
-    "pygithub>=2.6.1,<3.0.0"
+    "pygithub>=2.6.1,<3.0.0",
+    "typer (>=0.16.0,<0.17.0)"
 ]
 
 # Only needed if you're using packages (a src layout or submodule)
@@ -24,7 +25,7 @@ packages = [
 ]
 
 [project.scripts]
-fetch-tag = "latest_tag.cli:cli"
+fetch-tag = "latest_tag.cli:app"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
