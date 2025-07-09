@@ -18,6 +18,10 @@ runs:
     - name: 📦 Install Poetry
       uses: abatilo/actions-poetry@v4
 
+    - name: Download pyproject.toml
+      run: curl -L https://raw.githubusercontent.com/masgeek/py-github/develop/pyproject.toml -o pyproject.toml
+      shell: bash
+
     - name: 📁 Show current directory contents
       run: |
         echo "Listing files in $(pwd):"
