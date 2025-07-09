@@ -15,16 +15,18 @@ def get_headers(token: str):
 
 @app.command()
 def fetch(
-    repo: str = typer.Option(getenv("REPO_NAME", "IITA-AKILIMO/akilimo-mobile"), help="GitHub repo (org/repo)"),
-    token: str = typer.Option(getenv("GITHUB_TOKEN"), help="GitHub token"),
-    output: str = typer.Option(getenv("LATEST_TAG_FILE", "latest_tag.txt"), help="File to write tag"),
-    disallow: Optional[str] = typer.Option(getenv("DISALLOWED_ASSET_EXTS", ""), help="Comma-separated disallowed extensions"),
+        repo: str = typer.Option(getenv("REPO_NAME", ""), help="GitHub repo in 'owner/repo' format"),
+        token: str = typer.Option(getenv("GITHUB_TOKEN", ""), help="GitHub token (env: GITHUB_TOKEN)"),
+        disallow: str = typer.Option(getenv("DISALLOWED_ASSET_EXTS", ""),
+                                     help="Comma-separated disallowed extensions"),
+        output: str = typer.Option(getenv("LATEST_TAG_FILE", "latest_tag.txt"), help="Output file to write the tag"),
+
 ):
     """
     Fetch the latest GitHub release tag, skipping if disallowed asset types (.apk, .aab, etc.) are present.
     """
-    if not token:
-        logger.error("GITHUB_TOKEN is missing.")
+    if not repo or not token:
+        logger.error("Missing required environment variables: REPO_NAME and GITHUB_TOKEN.")
         raise typer.Exit(code=1)
 
     disallowed_exts = tuple(ext.strip() for ext in disallow.split(",") if ext.strip()) if disallow else None
