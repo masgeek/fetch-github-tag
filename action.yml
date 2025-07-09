@@ -5,7 +5,7 @@ inputs: { }
 outputs:
   tag:
     description: "The fetched release tag"
-    value: ${{ jobs.fetch-tag-job.outputs.tag }}
+    value: "1000"
 
 runs:
   using: "composite"
