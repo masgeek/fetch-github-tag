@@ -28,8 +28,8 @@ runs:
       shell: bash
 
     - name: 🚀 Run fetch-tag
-      run: |
-        poetry run fetch-tag fetch
+      id: fetch_tag
+      run: poetry run fetch-tag
       shell: bash
 
     - name: 📤 Set output
