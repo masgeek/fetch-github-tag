@@ -1,21 +1,7 @@
 name: "Fetch GitHub Release Tag"
 description: "Fetch the latest GitHub release tag unless disallowed assets are attached (e.g. .apk, .aab)."
 author: "Munywele Sammy Barasa"
-inputs:
-  token:
-    description: "GitHub token with repo access"
-    required: true
-  repo:
-    description: "Repository name in 'owner/repo' format"
-    required: true
-  disallow:
-    description: "Comma-separated list of disallowed asset extensions"
-    required: false
-    default: ""
-  output:
-    description: "File path to write the tag"
-    required: false
-    default: "latest_tag.txt"
+inputs: {}
 outputs:
   tag:
     description: "The fetched release tag"
